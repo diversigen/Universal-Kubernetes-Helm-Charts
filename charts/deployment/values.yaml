@@ -129,6 +129,9 @@ extraEnvs: []
 # A way to pull secondary env variables from configmaps and secrets
 envFrom: []
 
+# This enables the deprecated memory kibibytes env variables for backwards compatibility. TODO: Remove from future release.
+usingMemoryKibiBytesEnvs: false
+
 # livenessProbes are used to determine when to restart a container
 livenessProbe:
   enabled: true
@@ -140,12 +143,13 @@ livenessProbe:
   failureThreshold: 3
 
   # Specify either httpGet, tcpSocket or exec
-  # httpGet uses path and port (below)
+  # httpGet uses scheme, path and port (below)
   # tcpSocket uses port (below)
   # exec uses command (below)
   probeType: httpGet
 
   # parameters for probes
+  scheme: HTTP
   path: /alive
   port: default-service
   command:
@@ -162,12 +166,13 @@ readinessProbe:
   failureThreshold: 2
 
   # Specify either httpGet, tcpSocket or exec
-  # httpGet uses path and port (below)
+  # httpGet uses scheme, path and port (below)
   # tcpSocket uses port (below)
   # exec uses command (below)
   probeType: httpGet
 
   # parameters for probes
+  scheme: HTTP
   path: /ready
   port: default-service
   command:

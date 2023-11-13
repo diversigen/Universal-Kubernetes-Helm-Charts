@@ -210,11 +210,7 @@ Return the appropriate apiVersion for rbac.
 Return the appropriate apiVersion for cronjob.
 */}}
 {{- define "cronjob.apiVersion" -}}
-  {{- if (default $.Capabilities "").APIVersions.Has "batch/v1" }}
-    {{- print "batch/v1" -}}
-  {{- else -}}
-    {{- print "batch/v1beta1" -}}
-  {{- end -}}
+  {{ ternary "batch/v1" "batch/v1beta1" (.Capabilities.APIVersions.Has "batch/v1") }}
 {{- end -}}
 
 
@@ -246,13 +242,7 @@ Return the appropriate apiVersion for poddisruptionbudget.
 Return the appropriate apiVersion for horizontalpodautoscaler.
 */}}
 {{- define "hpa.apiVersion" -}}
-  {{- if (default $.Capabilities "").APIVersions.Has "autoscaling/v2/HorizontalPodAutoscaler" }}
-    {{- print "autoscaling/v2" }}
-  {{- else if $.Capabilities.APIVersions.Has "autoscaling/v2beta2/HorizontalPodAutoscaler" }}
-    {{- print "autoscaling/v2beta2" }}
-  {{- else }}
-    {{- print "autoscaling/v2beta1" }}
-  {{- end }}
+  {{ ternary "autoscaling/v2" "autoscaling/v2beta2" (.Capabilities.APIVersions.Has "autoscaling/v2") }}
 {{- end }}
 
 {{/*

@@ -5,7 +5,7 @@
 {{- $toplevel := . }}
 {{- range $job := .Values.cronjobs }}
 
-apiVersion: {{ template "cronjob.apiVersion" . }}
+apiVersion: {{ template "cronjob.apiVersion" $toplevel }}
 kind: CronJob
 metadata:
   name: {{ $job.name | quote }}
@@ -155,16 +155,29 @@ spec:
                     resourceFieldRef:
                       resource: limits.cpu
                       divisor: 1m
+{{- if $toplevel.Values.usingMemoryKibiBytesEnvs }}
                 - name: CONTAINER_MEMORY_REQUESTS_KIBIBYTES
                   valueFrom:
                     resourceFieldRef:
-                      resource: limits.memory
+                      resource: requests.memory
                       divisor: 1Ki
                 - name: CONTAINER_MEMORY_LIMITS_KIBIBYTES
                   valueFrom:
                     resourceFieldRef:
                       resource: limits.memory
                       divisor: 1Ki
+{{- else }}
+                - name: CONTAINER_MEMORY_REQUESTS_MEGABYTES
+                  valueFrom:
+                    resourceFieldRef:
+                      resource: requests.memory
+                      divisor: 1Mi
+                - name: CONTAINER_MEMORY_LIMITS_MEGABYTES
+                  valueFrom:
+                    resourceFieldRef:
+                      resource: limits.memory
+                      divisor: 1Mi
+{{- end }}
 
                 # Global variables placed in a "global" values file for all environments
                 {{- if $toplevel.Values.globalEnvs }}
@@ -210,6 +223,11 @@ spec:
 {{ toYaml . | indent 12 }}
 {{- end }}
 
+# This is our image pull secret references, if we have image pull secrets
+{{- with $toplevel.Values.image.imagePullSecrets }}
+          imagePullSecrets:
+{{ toYaml . | indent 12 }}
+{{- end }}
 
 # Service Account creation
 {{- if or (eq $toplevel.Values.serviceAccount.enabled true) (eq $toplevel.Values.rbac.create true) }}
@@ -218,8 +236,3 @@ spec:
 ---
 {{- end }}
 
-# This is our image pull secret references, if we have image pull secrets
-{{- with .Values.image.imagePullSecrets }}
-          imagePullSecrets:
-{{ toYaml . | indent 12 }}
-{{- end }}
